@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Pet Perdido",
+    "slug": "pet-perdido",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {},
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
