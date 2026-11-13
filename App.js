@@ -14,6 +14,7 @@ import AnnouncementDetailScreen from './src/screens/AnnouncementDetailScreen';
 import MyAnnouncementsScreen from './src/screens/MyAnnouncementsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import ReunionScreen from './src/screens/ReunionScreen';
 import { auth } from './src/services/firebaseConfig';
 import styles, { colors } from './src/styles';
 
@@ -57,6 +58,8 @@ function AppNavigator() {
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="MyAnnouncements" component={MyAnnouncementsScreen} />
             <Stack.Screen name="AnnouncementDetail" component={AnnouncementDetailScreen} />
+            {/* T15 opens over Meus anúncios, with the screen behind it still visible */}
+            <Stack.Screen name="Reunion" component={ReunionScreen} options={{ presentation: 'transparentModal', animation: 'fade' }} />
           </>
         ) : (
           <>
