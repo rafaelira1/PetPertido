@@ -29,7 +29,7 @@ function formatDate(value) {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-function MyAnnouncementCard({ announcement, onOpen, onDelete, onReunited, isActive }) {
+function MyAnnouncementCard({ announcement, onOpen, onEdit, onDelete, onReunited, isActive }) {
   const name = announcement.name || 'Pet sem nome';
   const species = announcement.species || 'Espécie não informada';
   const typeLabel = announcement.type === 'found' ? 'ENCONTRADO' : 'PERDIDO';
@@ -60,7 +60,7 @@ function MyAnnouncementCard({ announcement, onOpen, onDelete, onReunited, isActi
         {isActive ? (
           <TouchableOpacity
             accessibilityRole="button"
-            onPress={() => Alert.alert('Editar anúncio', 'A tela de edição será adicionada em uma próxima etapa.')}
+            onPress={onEdit}
             style={styles.announcementAction}
           >
             <MaterialCommunityIcons name="pencil-outline" size={16} color={colors.primary} />
@@ -207,6 +207,7 @@ export default function MyAnnouncementsScreen({ navigation }) {
               isActive={activeTab === 'active'}
               onOpen={() => navigation.navigate('AnnouncementDetail', { announcementId: item.id })}
               onDelete={() => handleDelete(item)}
+              onEdit={() => navigation.navigate('PostForm', { post: item })}
               onReunited={() => navigation.navigate('Reunion', { post: item })}
             />
           )}
