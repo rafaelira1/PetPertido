@@ -15,6 +15,7 @@ import MyAnnouncementsScreen from './src/screens/MyAnnouncementsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import PostFormScreen from './src/screens/PostFormScreen';
+import SimilarPostsScreen from './src/screens/SimilarPostsScreen';
 import ReunionScreen from './src/screens/ReunionScreen';
 import { auth } from './src/services/firebaseConfig';
 import styles, { colors } from './src/styles';
@@ -61,6 +62,7 @@ function AppNavigator() {
             <Stack.Screen name="AnnouncementDetail" component={AnnouncementDetailScreen} />
             {/* T07 to T11, T14 and T15 use the stack header with the back arrow */}
             <Stack.Screen name="PostForm" component={PostFormScreen} options={{ headerShown: true, title: 'Anúncio' }} />
+            <Stack.Screen name="SimilarPosts" component={SimilarPostsScreen} options={{ headerShown: true, title: 'Anúncios parecidos' }} />
             {/* T15 opens over Meus anúncios, with the screen behind it still visible */}
             <Stack.Screen name="Reunion" component={ReunionScreen} options={{ presentation: 'transparentModal', animation: 'fade' }} />
           </>

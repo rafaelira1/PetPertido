@@ -138,7 +138,7 @@ export default function AnnouncementDetailScreen({ navigation, route }) {
             <TouchableOpacity
               accessibilityRole="button"
               style={styles.secondaryButton}
-              onPress={() => Alert.alert('Anúncios parecidos', 'As sugestões de anúncios serão adicionadas em uma próxima etapa.')}
+              onPress={() => navigation.navigate('SimilarPosts', { post: announcement })}
             >
               <MaterialCommunityIcons name="star-four-points-outline" size={17} color={colors.primary} />
               <Text style={[styles.secondaryButtonText, { marginLeft: 6 }]}>Parecidos</Text>
