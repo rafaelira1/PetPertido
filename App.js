@@ -14,6 +14,7 @@ import AnnouncementDetailScreen from './src/screens/AnnouncementDetailScreen';
 import MyAnnouncementsScreen from './src/screens/MyAnnouncementsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import NewPostScreen from './src/screens/NewPostScreen';
 import FoundPhotoScreen from './src/screens/FoundPhotoScreen';
 import PostFormScreen from './src/screens/PostFormScreen';
 import SimilarPostsScreen from './src/screens/SimilarPostsScreen';
@@ -62,6 +63,7 @@ function AppNavigator() {
             <Stack.Screen name="MyAnnouncements" component={MyAnnouncementsScreen} />
             <Stack.Screen name="AnnouncementDetail" component={AnnouncementDetailScreen} />
             {/* T07 to T11, T14 and T15 use the stack header with the back arrow */}
+            <Stack.Screen name="NewPost" component={NewPostScreen} options={{ headerShown: true, title: 'Publicar' }} />
             <Stack.Screen name="FoundPhoto" component={FoundPhotoScreen} options={{ headerShown: true, title: 'Animal encontrado' }} />
             <Stack.Screen name="PostForm" component={PostFormScreen} options={{ headerShown: true, title: 'Anúncio' }} />
             <Stack.Screen name="SimilarPosts" component={SimilarPostsScreen} options={{ headerShown: true, title: 'Anúncios parecidos' }} />

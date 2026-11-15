@@ -6,7 +6,7 @@ import styles, { colors } from '../styles';
 
 const items = [
   { key: 'home', label: 'Início', icon: 'home', route: 'Home' },
-  { key: 'publish', label: 'Publicar', icon: 'plus-circle-outline' },
+  { key: 'publish', label: 'Publicar', icon: 'plus-circle-outline', route: 'NewPost' },
   { key: 'profile', label: 'Perfil', icon: 'account-outline', route: 'Profile' },
 ];
 
