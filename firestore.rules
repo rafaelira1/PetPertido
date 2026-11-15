@@ -6,7 +6,7 @@ service cloud.firestore {
           'userId', 'type', 'status', 'createdAt', 'reunitedAt', 'name',
           'species', 'breed', 'color', 'size', 'characteristics',
           'lastSeenAt', 'neighborhood', 'referencePoint', 'photoUrl',
-          'contactWhatsapp'
+          'contactWhatsapp', 'situation'
         ])
         && data.keys().hasAll(['userId', 'type', 'status', 'createdAt'])
         && data.type in ['lost', 'found']
