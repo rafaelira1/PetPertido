@@ -22,6 +22,26 @@ const tabs = [
   { key: 'found', label: 'Encontrados' },
 ];
 
+const clearedFilters = {
+  type: 'all',
+  species: 'all',
+  size: 'all',
+  period: 'all',
+  neighborhood: '',
+};
+
+function getActiveFilterLabels(filters) {
+  const labels = [];
+  if (filters.species === 'dog') labels.push('Cães');
+  if (filters.species === 'cat') labels.push('Gatos');
+  const sizes = { pequeno: 'Pequeno', médio: 'Médio', grande: 'Grande' };
+  if (sizes[filters.size]) labels.push(`Porte: ${sizes[filters.size]}`);
+  const periods = { '24h': 'Últimas 24 horas', '7d': 'Últimos 7 dias', '30d': 'Últimos 30 dias' };
+  if (periods[filters.period]) labels.push(periods[filters.period]);
+  if (filters.neighborhood?.trim()) labels.push(`Bairro: ${filters.neighborhood.trim()}`);
+  return labels;
+}
+
 function formatDate(value) {
   if (!value) return 'Data não informada';
 
@@ -74,6 +94,7 @@ export default function HomeScreen({ navigation, route }) {
   const [filters, setFilters] = useState({
     type: 'all',
     species: 'all',
+    size: 'all',
     period: '7d',
     neighborhood: '',
   });
@@ -81,12 +102,14 @@ export default function HomeScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const activeFilterLabels = getActiveFilterLabels(filters);
 
   useEffect(() => {
     if (route.params?.filters) {
       setFilters({
         type: 'all',
         species: 'all',
+        size: 'all',
         period: '7d',
         neighborhood: '',
         ...route.params.filters,
@@ -165,13 +188,23 @@ export default function HomeScreen({ navigation, route }) {
           <Text style={styles.homeSubtitle}>Anúncios recentes</Text>
           <TouchableOpacity
             accessibilityRole="button"
-            onPress={() => navigation.navigate('Filters', { filters, activeTab })}
+            onPress={() => navigation.navigate('Filters', {
+              filters: { ...filters, type: filters.type === 'all' ? 'all' : activeTab },
+              activeTab,
+            })}
             style={styles.filterButton}
           >
             <MaterialCommunityIcons name="tune-variant" size={17} color={colors.primary} />
-            <Text style={styles.filterButtonText}>Filtros</Text>
+            <Text style={styles.filterButtonText}>
+              Filtros{activeFilterLabels.length ? ` (${activeFilterLabels.length})` : ''}
+            </Text>
           </TouchableOpacity>
         </View>
+        {activeFilterLabels.length > 0 && (
+          <Text style={[styles.homeSubtitle, { marginTop: 8 }]}>
+            Filtros ativos: {activeFilterLabels.join(' · ')}
+          </Text>
+        )}
       </View>
 
       <View style={{ flex: 1 }}>
@@ -193,17 +226,25 @@ export default function HomeScreen({ navigation, route }) {
           <View style={styles.listStatus}>
             <MaterialCommunityIcons name="paw-outline" size={34} color={colors.muted} />
             <Text style={styles.listStatusTitle}>
-              Nenhum pet {activeTab === 'lost' ? 'perdido' : 'encontrado'} por enquanto
+              {activeFilterLabels.length > 0
+                ? 'Nenhum anúncio encontrado com esses filtros'
+                : `Nenhum pet ${activeTab === 'lost' ? 'perdido' : 'encontrado'} por enquanto`}
             </Text>
             <Text style={styles.listStatusText}>
-              Quando houver novos anúncios, eles aparecerão aqui.
+              {activeFilterLabels.length > 0
+                ? 'Limpe os filtros para ampliar sua busca.'
+                : 'Quando houver novos anúncios, eles aparecerão aqui.'}
             </Text>
             <TouchableOpacity
               accessibilityRole="button"
-              onPress={() => loadAnnouncements(true)}
+              onPress={activeFilterLabels.length > 0
+                ? () => setFilters({ ...clearedFilters })
+                : () => loadAnnouncements(true)}
               style={[styles.secondaryButton, { marginTop: 18 }]}
             >
-              <Text style={styles.secondaryButtonText}>Atualizar lista</Text>
+              <Text style={styles.secondaryButtonText}>
+                {activeFilterLabels.length > 0 ? 'Limpar filtros' : 'Atualizar lista'}
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (

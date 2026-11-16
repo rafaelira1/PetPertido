@@ -34,6 +34,9 @@ export async function getActiveAnnouncements(type, filters = {}) {
   if (filters.species && filters.species !== 'all') {
     constraints.push(where('species', '==', filters.species));
   }
+  if (filters.size && filters.size !== 'all') {
+    constraints.push(where('size', '==', filters.size));
+  }
   if (filters.neighborhood?.trim()) {
     constraints.push(where('neighborhood', '==', filters.neighborhood.trim()));
   }

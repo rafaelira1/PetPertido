@@ -5,6 +5,7 @@ import {
   Image,
   Linking,
   ScrollView,
+  Share,
   Text,
   TouchableOpacity,
   View,
@@ -34,6 +35,12 @@ function DetailItem({ label, value }) {
       <Text style={styles.detailValue}>{value}</Text>
     </View>
   );
+}
+
+function speciesLabel(species) {
+  if (species === 'dog') return 'Cão';
+  if (species === 'cat') return 'Gato';
+  return species;
 }
 
 export default function AnnouncementDetailScreen({ navigation, route }) {
@@ -74,6 +81,30 @@ export default function AnnouncementDetailScreen({ navigation, route }) {
       await Linking.openURL(url);
     } catch (error) {
       Alert.alert('Não foi possível abrir o WhatsApp', 'Verifique se há um navegador ou WhatsApp disponível.');
+    }
+  };
+
+  const shareAnnouncement = async () => {
+    const lines = [
+      announcement.type === 'found' ? 'Animal encontrado' : 'Pet perdido',
+      announcement.status === 'reunited' ? 'Situação do anúncio: reencontrado' : null,
+      announcement.name ? `Nome: ${announcement.name}` : null,
+      announcement.species ? `Espécie: ${speciesLabel(announcement.species)}` : null,
+      announcement.breed ? `Raça: ${announcement.breed}` : null,
+      announcement.color ? `Pelagem: ${announcement.color}` : null,
+      announcement.size ? `Porte: ${announcement.size}` : null,
+      announcement.characteristics ? `Características: ${announcement.characteristics}` : null,
+      announcement.neighborhood ? `Bairro: ${announcement.neighborhood}` : null,
+      announcement.referencePoint ? `Ponto de referência: ${announcement.referencePoint}` : null,
+      announcement.lastSeenAt ? `Data em que foi visto: ${formatDate(announcement.lastSeenAt)}` : null,
+      announcement.type === 'found' && announcement.situation ? `Situação: ${announcement.situation}` : null,
+      announcement.contactWhatsapp ? `Contato por WhatsApp: ${announcement.contactWhatsapp}` : null,
+    ].filter(Boolean);
+
+    try {
+      await Share.share({ message: lines.join('\n') });
+    } catch (error) {
+      Alert.alert('Não foi possível compartilhar', 'Tente novamente.');
     }
   };
 
@@ -130,8 +161,19 @@ export default function AnnouncementDetailScreen({ navigation, route }) {
               <DetailItem label="Porte" value={announcement.size} />
             </View>
             <DetailItem label="Características" value={announcement.characteristics} />
+            {announcement.type === 'found' && (
+              <DetailItem label="Situação do animal" value={announcement.situation} />
+            )}
             <DetailItem label="Onde foi visto" value={location || 'Bairro não informado'} />
             <DetailItem label="Data em que foi visto" value={formatDate(announcement.lastSeenAt)} />
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={shareAnnouncement}
+              style={[styles.secondaryButton, { marginTop: 16, flexDirection: 'row' }]}
+            >
+              <MaterialCommunityIcons name="share-variant-outline" size={18} color={colors.primary} />
+              <Text style={[styles.secondaryButtonText, { marginLeft: 7 }]}>Compartilhar anúncio</Text>
+            </TouchableOpacity>
           </ScrollView>
 
           <View style={styles.detailFooter}>
