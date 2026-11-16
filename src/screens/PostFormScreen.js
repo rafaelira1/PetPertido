@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -44,6 +44,22 @@ function PostFormScreen({ navigation, route }) {
   const [referencePoint, setReferencePoint] = useState(start.referencePoint || '');
   const [situation, setSituation] = useState(start.situation || 'Está comigo');
   const [date, setDate] = useState(startDate);
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+
+  const clearError = (field) => {
+    setErrors((current) => {
+      if (!current[field]) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const fieldError = (field) => errors[field] ? (
+    <Text accessibilityRole="alert" style={{ color: '#b42318', marginTop: 4 }}>{errors[field]}</Text>
+  ) : null;
 
   // Changes the title at the top of the screen
   useEffect(() => {
@@ -65,30 +81,48 @@ function PostFormScreen({ navigation, route }) {
       const image = await context.renderAsync();
       const small = await image.saveAsync({ compress: 0.5, format: SaveFormat.JPEG, base64: true });
       setPhoto('data:image/jpeg;base64,' + small.base64);
+      clearError('photo');
     }
   };
 
   // Turns "dd/mm/aaaa" into a Date. Returns null when the text is not a real date.
   const readDate = (text) => {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return null;
     const parts = text.split('/');
     const day = Number(parts[0]);
     const month = Number(parts[1]);
     const year = Number(parts[2]);
     const value = new Date(year, month - 1, day);
-    if (parts.length !== 3 || parts[2].length !== 4 || value.getDate() !== day || value.getMonth() !== month - 1) {
+    if (value.getFullYear() !== year || value.getDate() !== day || value.getMonth() !== month - 1) {
       return null;
     }
     return value;
   };
 
   const savePost = async () => {
-    // The pet name is required only for lost pets
-    const nameOk = name !== '' || !isLost;
-    const seenAt = readDate(date);
+    if (savingRef.current) return;
+    const seenAt = readDate(date.trim());
+    const validationErrors = {};
+    if (!photo) validationErrors.photo = 'Adicione uma foto do animal.';
+    if (isLost && !name.trim()) validationErrors.name = 'Informe o nome do pet.';
+    if (!species) validationErrors.species = 'Selecione a espécie do animal.';
+    if (!size) validationErrors.size = 'Selecione o porte do animal.';
+    if (!neighborhood.trim()) validationErrors.neighborhood = 'Informe o bairro.';
+    if (!seenAt) {
+      validationErrors.date = 'Informe uma data válida no formato dd/mm/aaaa.';
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (seenAt > today) validationErrors.date = 'A data não pode estar no futuro.';
+    }
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length) return;
 
-    if (photo && species && size && neighborhood.trim() && nameOk && seenAt) {
+    savingRef.current = true;
+    setSaving(true);
+    try {
       const postData = {
-        name: name,
+        name: name.trim(),
         photoUrl: photo,
         species: species,
         breed: breed,
@@ -103,40 +137,37 @@ function PostFormScreen({ navigation, route }) {
         postData.situation = situation;
       }
 
-      try {
-        if (post) {
-          // T14: Update (RF13, RF17)
-          await updateDoc(doc(db, 'announcements', post.id), postData);
-          alert('Anúncio atualizado com sucesso!');
-          navigation.goBack();
-        } else {
-          // T08 and T10: Create (RF11, RF15)
-          const user = await getDoc(doc(db, 'users', auth.currentUser.uid));
-          postData.userId = auth.currentUser.uid;
-          postData.type = type;
-          postData.status = 'active';
-          postData.createdAt = serverTimestamp();
-          postData.contactWhatsapp = user.exists() ? user.data().whatsapp || '' : '';
+      if (post) {
+        // T14: Update (RF13, RF17)
+        await updateDoc(doc(db, 'announcements', post.id), postData);
+        alert('Anúncio atualizado com sucesso!');
+        navigation.goBack();
+      } else {
+        // T08 and T10: Create (RF11, RF15)
+        const user = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        postData.userId = auth.currentUser.uid;
+        postData.type = type;
+        postData.status = 'active';
+        postData.createdAt = serverTimestamp();
+        postData.contactWhatsapp = user.exists() ? user.data().whatsapp || '' : '';
 
-          const newPost = await addDoc(collection(db, 'announcements'), postData);
-          postData.id = newPost.id;
+        const newPost = await addDoc(collection(db, 'announcements'), postData);
+        postData.id = newPost.id;
 
-          // Início stays below Parecidos, so "back" does not open the form again
-          navigation.reset({
-            index: 1,
-            routes: [
-              { name: 'Home' },
-              { name: 'SimilarPosts', params: { post: postData, justPublished: true } },
-            ],
-          });
-        }
-      } catch (error) {
-        alert('Erro ao salvar: ' + error.message);
+        // Início stays below Parecidos, so "back" does not open the form again
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'Home' },
+            { name: 'SimilarPosts', params: { post: postData, justPublished: true } },
+          ],
+        });
       }
-    } else if (!seenAt) {
-      alert('Digite a data no formato dd/mm/aaaa.');
-    } else {
-      alert('Por favor, preencha a foto, a espécie, o porte, o bairro e o nome do pet.');
+    } catch (error) {
+      alert('Erro ao salvar: ' + error.message);
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
@@ -179,6 +210,7 @@ function PostFormScreen({ navigation, route }) {
         )}
       </TouchableOpacity>
       <Text style={styles.text_hint}>Toque na foto para escolher outra. De preferência do corpo inteiro.</Text>
+      {fieldError('photo')}
 
       {isLost && (
         <View>
@@ -188,8 +220,9 @@ function PostFormScreen({ navigation, route }) {
             placeholder="Ex.: Thor"
             placeholderTextColor="gray"
             value={name}
-            onChangeText={setName}
+            onChangeText={(value) => { setName(value); clearError('name'); }}
           />
+          {fieldError('name')}
         </View>
       )}
 
@@ -197,17 +230,18 @@ function PostFormScreen({ navigation, route }) {
       <View style={styles.row}>
         <TouchableOpacity
           style={species === 'dog' ? styles.option_selected : styles.option}
-          onPress={() => setSpecies('dog')}
+          onPress={() => { setSpecies('dog'); clearError('species'); }}
         >
           <Text style={species === 'dog' ? styles.text_option_selected : styles.text_option}>Cão</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={species === 'cat' ? styles.option_selected : styles.option}
-          onPress={() => setSpecies('cat')}
+          onPress={() => { setSpecies('cat'); clearError('species'); }}
         >
           <Text style={species === 'cat' ? styles.text_option_selected : styles.text_option}>Gato</Text>
         </TouchableOpacity>
       </View>
+      {fieldError('species')}
 
       <View style={styles.row}>
         <View style={styles.column}>
@@ -236,23 +270,24 @@ function PostFormScreen({ navigation, route }) {
       <View style={styles.row}>
         <TouchableOpacity
           style={size === 'pequeno' ? styles.option_selected : styles.option}
-          onPress={() => setSize('pequeno')}
+          onPress={() => { setSize('pequeno'); clearError('size'); }}
         >
           <Text style={size === 'pequeno' ? styles.text_option_selected : styles.text_option}>Pequeno</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={size === 'médio' ? styles.option_selected : styles.option}
-          onPress={() => setSize('médio')}
+          onPress={() => { setSize('médio'); clearError('size'); }}
         >
           <Text style={size === 'médio' ? styles.text_option_selected : styles.text_option}>Médio</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={size === 'grande' ? styles.option_selected : styles.option}
-          onPress={() => setSize('grande')}
+          onPress={() => { setSize('grande'); clearError('size'); }}
         >
           <Text style={size === 'grande' ? styles.text_option_selected : styles.text_option}>Grande</Text>
         </TouchableOpacity>
       </View>
+      {fieldError('size')}
 
       <Text style={styles.text_label}>Características marcantes</Text>
       <TextInput
@@ -270,8 +305,9 @@ function PostFormScreen({ navigation, route }) {
         placeholder="Ex.: Meireles"
         placeholderTextColor="gray"
         value={neighborhood}
-        onChangeText={setNeighborhood}
+        onChangeText={(value) => { setNeighborhood(value); clearError('neighborhood'); }}
       />
+      {fieldError('neighborhood')}
       <Text style={styles.text_label}>Ponto de referência</Text>
       <TextInput
         style={styles.text_input}
@@ -320,15 +356,29 @@ function PostFormScreen({ navigation, route }) {
         placeholder="dd/mm/aaaa"
         placeholderTextColor="gray"
         value={date}
-        onChangeText={setDate}
+        onChangeText={(value) => { setDate(value); clearError('date'); }}
       />
+      {fieldError('date')}
 
-      <TouchableOpacity style={styles.button_dark} onPress={savePost}>
-        <Text style={styles.text_button_dark}>{post ? 'Salvar alterações' : 'Publicar anúncio'}</Text>
+      {Object.keys(errors).length > 0 && (
+        <Text accessibilityRole="alert" style={{ color: '#b42318', marginTop: 12 }}>
+          Confira os campos destacados acima antes de continuar.
+        </Text>
+      )}
+
+      <TouchableOpacity
+        style={[styles.button_dark, saving && { opacity: 0.6 }]}
+        onPress={savePost}
+        disabled={saving}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: saving, busy: saving }}
+      >
+        {saving && <ActivityIndicator color="#fff" />}
+        <Text style={styles.text_button_dark}>{saving ? 'Salvando...' : post ? 'Salvar alterações' : 'Publicar anúncio'}</Text>
       </TouchableOpacity>
 
       {post && (
-        <TouchableOpacity onPress={deletePost}>
+        <TouchableOpacity onPress={deletePost} disabled={saving}>
           <Text style={styles.text_link}>Excluir anúncio</Text>
         </TouchableOpacity>
       )}

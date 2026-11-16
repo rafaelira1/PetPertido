@@ -25,6 +25,12 @@ const filterOptions = {
     { key: 'cat', label: 'Gatos' },
     { key: 'all', label: 'Todos' },
   ],
+  size: [
+    { key: 'pequeno', label: 'Pequeno' },
+    { key: 'médio', label: 'Médio' },
+    { key: 'grande', label: 'Grande' },
+    { key: 'all', label: 'Todos' },
+  ],
   period: [
     { key: '24h', label: '24 horas' },
     { key: '7d', label: '7 dias' },
@@ -63,12 +69,14 @@ export default function FiltersScreen({ navigation, route }) {
   const startFilters = route.params?.filters || {};
   const [type, setType] = useState(startFilters.type || route.params?.activeTab || 'all');
   const [species, setSpecies] = useState(startFilters.species || 'all');
+  const [size, setSize] = useState(startFilters.size || 'all');
   const [period, setPeriod] = useState(startFilters.period || '7d');
   const [neighborhood, setNeighborhood] = useState(startFilters.neighborhood || '');
 
   const clearFilters = () => {
     setType('all');
     setSpecies('all');
+    setSize('all');
     setPeriod('all');
     setNeighborhood('');
   };
@@ -77,7 +85,7 @@ export default function FiltersScreen({ navigation, route }) {
     const activeTab = type === 'all' ? route.params?.activeTab || 'lost' : type;
     navigation.navigate('Home', {
       activeTab,
-      filters: { type, species, period, neighborhood: neighborhood.trim() },
+      filters: { type, species, size, period, neighborhood: neighborhood.trim() },
     });
   };
 
@@ -111,6 +119,12 @@ export default function FiltersScreen({ navigation, route }) {
             options={filterOptions.species}
             selected={species}
             onSelect={setSpecies}
+          />
+          <FilterChoices
+            title="Porte"
+            options={filterOptions.size}
+            selected={size}
+            onSelect={setSize}
           />
           <FilterChoices
             title="Período"

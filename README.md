@@ -16,9 +16,10 @@ A person who lost a pet publishes an announcement with a photo and the place whe
 - Account creation with name, WhatsApp, and acceptance of terms.
 - Password recovery by email.
 - Home list with separate lost and found tabs.
-- Filters for type, species, period, and neighborhood.
-- Announcement details and a WhatsApp contact button.
-- Lost pet announcement with photo, name, species, size, neighborhood, and date.
+- Filters for type, species, size, period, and neighborhood, with active filters shown on the home screen.
+- Announcement details, including the situation of a found animal, and a WhatsApp contact button.
+- Text-only announcement sharing through the phone's native share menu.
+- Lost pet announcement with photo, name, species, size, neighborhood, and date; required fields and dates are validated before saving.
 - Found animal announcement from a photo. The AI reads the photo and fills in species, breed, color, and size.
 - Similar announcements. The AI compares a lost pet with the found animals of the same species (or a found animal with the lost pets) and shows up to 5 that may be the same animal.
 - Profile summary and the user's own announcement list.
