@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { collection, addDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import DeleteAnnouncementModal from '../components/DeleteAnnouncementModal';
+import { deleteAnnouncement } from '../services/announcementService';
 import { auth, db } from '../services/firebaseConfig';
 import styles from '../postStyles';
 
@@ -46,6 +48,7 @@ function PostFormScreen({ navigation, route }) {
   const [date, setDate] = useState(startDate);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
   const savingRef = useRef(false);
 
   const clearError = (field) => {
@@ -169,25 +172,6 @@ function PostFormScreen({ navigation, route }) {
       savingRef.current = false;
       setSaving(false);
     }
-  };
-
-  // T14: Delete (RF14, RF18)
-  const deletePost = () => {
-    Alert.alert('Excluir anúncio', 'Tem certeza? Não dá para desfazer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteDoc(doc(db, 'announcements', post.id));
-            navigation.goBack();
-          } catch (error) {
-            alert('Erro ao excluir: ' + error.message);
-          }
-        },
-      },
-    ]);
   };
 
   return (
@@ -378,10 +362,16 @@ function PostFormScreen({ navigation, route }) {
       </TouchableOpacity>
 
       {post && (
-        <TouchableOpacity onPress={deletePost} disabled={saving}>
+        <TouchableOpacity onPress={() => setDeleteVisible(true)} disabled={saving}>
           <Text style={styles.text_link}>Excluir anúncio</Text>
         </TouchableOpacity>
       )}
+      <DeleteAnnouncementModal
+        visible={deleteVisible}
+        onCancel={() => setDeleteVisible(false)}
+        onConfirm={() => deleteAnnouncement(post.id)}
+        onDeleted={() => navigation.goBack()}
+      />
     </ScrollView>
   );
 }
