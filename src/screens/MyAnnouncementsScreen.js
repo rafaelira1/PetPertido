@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -13,6 +12,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 
+import DeleteAnnouncementModal from '../components/DeleteAnnouncementModal';
 import { deleteAnnouncement, getUserAnnouncements } from '../services/announcementService';
 import { auth } from '../services/firebaseConfig';
 import styles, { colors } from '../styles';
@@ -93,6 +93,7 @@ export default function MyAnnouncementsScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [announcementToDelete, setAnnouncementToDelete] = useState(null);
 
   const loadAnnouncements = useCallback(async (isRefresh = false) => {
     if (!userId) {
@@ -118,28 +119,6 @@ export default function MyAnnouncementsScreen({ navigation }) {
   useFocusEffect(useCallback(() => {
     loadAnnouncements();
   }, [loadAnnouncements]));
-
-  const handleDelete = (announcement) => {
-    Alert.alert(
-      'Excluir anúncio?',
-      'O anúncio será removido permanentemente.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteAnnouncement(announcement.id);
-              await loadAnnouncements(true);
-            } catch (error) {
-              Alert.alert('Não foi possível excluir', 'Tente novamente.');
-            }
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
@@ -206,13 +185,21 @@ export default function MyAnnouncementsScreen({ navigation }) {
               announcement={item}
               isActive={activeTab === 'active'}
               onOpen={() => navigation.navigate('AnnouncementDetail', { announcementId: item.id })}
-              onDelete={() => handleDelete(item)}
+              onDelete={() => setAnnouncementToDelete(item)}
               onEdit={() => navigation.navigate('PostForm', { post: item })}
               onReunited={() => navigation.navigate('Reunion', { post: item })}
             />
           )}
         />
       )}
+      <DeleteAnnouncementModal
+        visible={Boolean(announcementToDelete)}
+        onCancel={() => setAnnouncementToDelete(null)}
+        onConfirm={async () => {
+          await deleteAnnouncement(announcementToDelete.id);
+          setAnnouncements((current) => current.filter((item) => item.id !== announcementToDelete.id));
+        }}
+      />
     </SafeAreaView>
   );
 }

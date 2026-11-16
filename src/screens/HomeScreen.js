@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { signOut } from 'firebase/auth';
 
 import BottomNavigation from '../components/BottomNavigation';
@@ -139,9 +140,9 @@ export default function HomeScreen({ navigation, route }) {
     }
   }, [activeTab, filters]);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     loadAnnouncements();
-  }, [loadAnnouncements]);
+  }, [loadAnnouncements]));
 
   const handleSignOut = async () => {
     if (auth) await signOut(auth);
