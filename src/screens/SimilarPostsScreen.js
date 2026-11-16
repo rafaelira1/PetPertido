@@ -7,7 +7,7 @@ import styles from '../postStyles';
 
 // Gemini API (RF07). The key comes from .env, which does not go to GitHub (RNF05).
 const GEMINI_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent';
 
 // T11 Anúncios parecidos (RF23). Opens right after a post is published ({ post, justPublished })
 // and from the "Parecidos" button of the post detail ({ post }).
