@@ -19,6 +19,7 @@ import FoundPhotoScreen from './src/screens/FoundPhotoScreen';
 import PostFormScreen from './src/screens/PostFormScreen';
 import SimilarPostsScreen from './src/screens/SimilarPostsScreen';
 import ReunionScreen from './src/screens/ReunionScreen';
+import TermsScreen from './src/screens/TermsScreen';
 import { auth } from './src/services/firebaseConfig';
 import styles, { colors } from './src/styles';
 
@@ -69,12 +70,14 @@ function AppNavigator() {
             <Stack.Screen name="SimilarPosts" component={SimilarPostsScreen} options={{ headerShown: true, title: 'Anúncios parecidos' }} />
             {/* T15 opens over Meus anúncios, with the screen behind it still visible */}
             <Stack.Screen name="Reunion" component={ReunionScreen} options={{ presentation: 'transparentModal', animation: 'fade' }} />
+            <Stack.Screen name="Terms" component={TermsScreen} options={{ headerShown: true, title: 'Termos de uso' }} />
           </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="Terms" component={TermsScreen} options={{ headerShown: true, title: 'Termos de uso' }} />
           </>
         )}
       </Stack.Navigator>

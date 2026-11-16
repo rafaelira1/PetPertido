@@ -186,7 +186,7 @@ export default function ProfileScreen({ navigation }) {
               <ProfileOption
                 icon="file-document-outline"
                 label="Termos de uso e privacidade"
-                onPress={() => Alert.alert('Termos e privacidade', 'Os termos aceitos no cadastro serão disponibilizados aqui.')}
+                onPress={() => navigation.navigate('Terms')}
               />
               <ProfileOption
                 icon="delete-outline"

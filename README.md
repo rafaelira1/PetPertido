@@ -14,6 +14,7 @@ A person who lost a pet publishes an announcement with a photo and the place whe
 
 - Login with email and password.
 - Account creation with name, WhatsApp, and acceptance of terms.
+- Terms of use and privacy policy screen, opened from sign-up and from the profile.
 - Password recovery by email.
 - Home list with separate lost and found tabs.
 - Filters for type, species, size, period, and neighborhood, with active filters shown on the home screen.

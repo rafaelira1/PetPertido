@@ -142,6 +142,10 @@ export default function RegisterScreen({ navigation }) {
               </Text>
             </TouchableOpacity>
 
+            <Text style={[styles.inlineLink, { marginBottom: 18 }]} onPress={() => navigation.navigate('Terms')}>
+              Ler os Termos de Uso e a Política de Privacidade
+            </Text>
+
             {errorMessage ? (
               <Text accessibilityRole="alert" style={[styles.fieldError, { marginBottom: 12 }]}>
                 {errorMessage}
